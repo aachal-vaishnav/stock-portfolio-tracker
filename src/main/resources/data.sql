@@ -1,0 +1,22 @@
+-- Seed Indian NSE stocks (top stocks by market cap)
+MERGE INTO stocks (id, symbol, name, exchange, sector, current_price) KEY(id) VALUES
+(1,  'RELIANCE',   'Reliance Industries Ltd',     'NSE', 'Energy',          2850.00),
+(2,  'TCS',        'Tata Consultancy Services',   'NSE', 'IT',              3520.00),
+(3,  'HDFCBANK',   'HDFC Bank Ltd',               'NSE', 'Banking',         1595.00),
+(4,  'INFY',       'Infosys Ltd',                 'NSE', 'IT',              1505.00),
+(5,  'ICICIBANK',  'ICICI Bank Ltd',              'NSE', 'Banking',         1095.00),
+(6,  'BHARTIARTL', 'Bharti Airtel Ltd',           'NSE', 'Telecom',         1290.00),
+(7,  'SBIN',       'State Bank of India',         'NSE', 'Banking',          820.00),
+(8,  'LT',         'Larsen & Toubro Ltd',         'NSE', 'Construction',    3650.00),
+(9,  'ITC',        'ITC Limited',                 'NSE', 'FMCG',             445.00),
+(10, 'HINDUNILVR', 'Hindustan Unilever Ltd',      'NSE', 'FMCG',            2380.00),
+(11, 'WIPRO',      'Wipro Limited',               'NSE', 'IT',               455.00),
+(12, 'MARUTI',     'Maruti Suzuki India Ltd',     'NSE', 'Auto',           12500.00),
+(13, 'AXISBANK',   'Axis Bank Ltd',               'NSE', 'Banking',         1145.00),
+(14, 'KOTAKBANK',  'Kotak Mahindra Bank Ltd',     'NSE', 'Banking',         1745.00),
+(15, 'ASIANPAINT', 'Asian Paints Ltd',            'NSE', 'Paints',          2890.00),
+(16, 'BAJFINANCE', 'Bajaj Finance Ltd',           'NSE', 'NBFC',            7250.00),
+(17, 'TITAN',      'Titan Company Ltd',           'NSE', 'Consumer',        3680.00),
+(18, 'NESTLEIND',  'Nestle India Ltd',            'NSE', 'FMCG',           24500.00),
+(19, 'TATAMOTORS', 'Tata Motors Ltd',             'NSE', 'Auto',             950.00),
+(20, 'SUNPHARMA',  'Sun Pharmaceutical Inds',     'NSE', 'Pharma',          1640.00);

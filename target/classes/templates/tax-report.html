@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Tax Report')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-calculator"></i> Capital Gains Tax Report</h2>
+        <a th:href="@{'/tax/pdf/' + ${report.financialYear}}" class="btn btn-danger">
+            <i class="bi bi-file-pdf"></i> Download PDF
+        </a>
+    </div>
+
+    <!-- FY Selector -->
+    <form method="get" th:action="@{/tax}" class="mb-4">
+        <div class="row align-items-center">
+            <div class="col-auto"><label class="form-label mb-0">Financial Year:</label></div>
+            <div class="col-auto">
+                <select name="fy" class="form-select" onchange="this.form.submit()">
+                    <option th:each="y : ${#numbers.sequence(currentFy - 5, currentFy)}"
+                            th:value="${y}" th:text="${'FY ' + y + '-' + (y+1)}"
+                            th:selected="${y == report.financialYear}">FY</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <small class="text-muted">Indian FY: Apr 1 to Mar 31. STCG=15%, LTCG=10% (₹1L exempt).</small>
+            </div>
+        </div>
+    </form>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">STCG (Short-Term)</small>
+                    <h4 class="mb-1">&#8377; <span th:text="${#numbers.formatDecimal(report.stcgGains, 0, 'COMMA', 2, 'POINT')}">0</span></h4>
+                    <small>Tax @ 15%: <strong>&#8377; <span th:text="${#numbers.formatDecimal(report.stcgTax, 0, 'COMMA', 2, 'POINT')}">0</span></strong></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">LTCG (Long-Term)</small>
+                    <h4 class="mb-1">&#8377; <span th:text="${#numbers.formatDecimal(report.ltcgGains, 0, 'COMMA', 2, 'POINT')}">0</span></h4>
+                    <small>Less ₹1,00,000 exempt</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">LTCG Taxable</small>
+                    <h4 class="mb-1">&#8377; <span th:text="${#numbers.formatDecimal(report.ltcgTaxable, 0, 'COMMA', 2, 'POINT')}">0</span></h4>
+                    <small>Tax @ 10%: <strong>&#8377; <span th:text="${#numbers.formatDecimal(report.ltcgTax, 0, 'COMMA', 2, 'POINT')}">0</span></strong></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <small>Total Tax Payable</small>
+                    <h4 class="mb-0">&#8377; <span th:text="${#numbers.formatDecimal(report.totalTax, 0, 'COMMA', 2, 'POINT')}">0</span></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lots Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Sale Details (FIFO Matched)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${report.lots.isEmpty()}" class="text-center py-5 text-muted">
+                <p>No sales in this Financial Year. Add SELL transactions to generate a tax report.</p>
+            </div>
+            <div th:unless="${report.lots.isEmpty()}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Symbol</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Buy Price</th>
+                            <th class="text-end">Sell Price</th>
+                            <th>Buy Date</th>
+                            <th>Sell Date</th>
+                            <th class="text-end">Days Held</th>
+                            <th>Type</th>
+                            <th class="text-end">Gain/Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="lot : ${report.lots}">
+                            <td><strong th:text="${lot.symbol}">SYM</strong></td>
+                            <td class="text-end" th:text="${lot.quantity}">0</td>
+                            <td class="text-end">&#8377; <span th:text="${lot.buyPrice}">0</span></td>
+                            <td class="text-end">&#8377; <span th:text="${lot.sellPrice}">0</span></td>
+                            <td th:text="${#temporals.format(lot.buyDate, 'dd-MMM-yyyy')}">Date</td>
+                            <td th:text="${#temporals.format(lot.sellDate, 'dd-MMM-yyyy')}">Date</td>
+                            <td class="text-end" th:text="${lot.holdingDays}">0</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${lot.type == 'LTCG'} ? 'bg-info' : 'bg-warning text-dark'"
+                                      th:text="${lot.type}">STCG</span>
+                            </td>
+                            <td class="text-end fw-bold"
+                                th:classappend="${lot.gainLoss.signum() >= 0} ? 'text-success' : 'text-danger'">
+                                &#8377; <span th:text="${#numbers.formatDecimal(lot.gainLoss, 0, 'COMMA', 2, 'POINT')}">0</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

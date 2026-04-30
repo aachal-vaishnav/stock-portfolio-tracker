@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Add Trade')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow border-0">
+                <div class="card-body p-4">
+                    <h3 class="mb-4"><i class="bi bi-plus-circle"></i> Add New Trade</h3>
+
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                    <form th:action="@{/transactions/add}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Stock *</label>
+                            <select name="stockId" class="form-select" required>
+                                <option value="">-- Select Stock --</option>
+                                <option th:each="s : ${stocks}" th:value="${s.id}"
+                                        th:text="${s.symbol + ' - ' + s.name + ' (CMP: ₹' + s.currentPrice + ')'}">
+                                    SYM
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Transaction Type *</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="type" id="buy" value="BUY" checked>
+                                <label class="btn btn-outline-success" for="buy">
+                                    <i class="bi bi-arrow-down-circle"></i> BUY
+                                </label>
+                                <input type="radio" class="btn-check" name="type" id="sell" value="SELL">
+                                <label class="btn btn-outline-danger" for="sell">
+                                    <i class="bi bi-arrow-up-circle"></i> SELL
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Quantity *</label>
+                                <input type="number" name="quantity" min="1" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price per share (₹) *</label>
+                                <input type="number" step="0.01" name="price" min="0.01" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Transaction Date *</label>
+                            <input type="date" name="date" class="form-control" required
+                                   th:value="${today}" th:max="${today}">
+                            <small class="text-muted">Use past date to test tax calculation (LTCG = held > 1 year)</small>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="bi bi-check-circle"></i> Save Trade
+                            </button>
+                            <a th:href="@{/dashboard}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

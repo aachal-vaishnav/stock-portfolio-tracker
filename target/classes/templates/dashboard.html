@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Dashboard')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+        <a th:href="@{/transactions/add}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Trade
+        </a>
+    </div>
+
+    <p class="text-muted">Welcome back, <strong th:text="${user.fullName}">User</strong>!</p>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <small>Total Invested</small>
+                    <h4 class="mb-0">&#8377; <span th:text="${#numbers.formatDecimal(summary.totalInvested, 0, 'COMMA', 2, 'POINT')}">0.00</span></h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info shadow-sm">
+                <div class="card-body">
+                    <small>Current Value</small>
+                    <h4 class="mb-0">&#8377; <span th:text="${#numbers.formatDecimal(summary.currentValue, 0, 'COMMA', 2, 'POINT')}">0.00</span></h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white shadow-sm"
+                 th:classappend="${summary.totalPnl.signum() >= 0} ? 'bg-success' : 'bg-danger'">
+                <div class="card-body">
+                    <small>Unrealized P&amp;L</small>
+                    <h4 class="mb-0">
+                        &#8377; <span th:text="${#numbers.formatDecimal(summary.totalPnl, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white shadow-sm"
+                 th:classappend="${summary.totalPnl.signum() >= 0} ? 'bg-success' : 'bg-danger'">
+                <div class="card-body">
+                    <small>Returns %</small>
+                    <h4 class="mb-0">
+                        <span th:text="${summary.totalPnlPercent}">0.00</span>%
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Holdings Table -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between">
+            <h5 class="mb-0"><i class="bi bi-briefcase"></i> Your Holdings (<span th:text="${summary.holdingsCount}">0</span>)</h5>
+            <small class="text-muted">Prices auto-update every 30 sec</small>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${summary.holdings.isEmpty()}" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox display-1 d-block"></i>
+                <p>No holdings yet. <a th:href="@{/transactions/add}">Add your first trade</a> to get started.</p>
+            </div>
+            <div th:unless="${summary.holdings.isEmpty()}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Name</th>
+                            <th>Sector</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Avg Buy</th>
+                            <th class="text-end">CMP</th>
+                            <th class="text-end">Invested</th>
+                            <th class="text-end">Current</th>
+                            <th class="text-end">P&amp;L</th>
+                            <th class="text-end">P&amp;L%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="h : ${summary.holdings}">
+                            <td><strong th:text="${h.symbol}">SYM</strong></td>
+                            <td><small th:text="${h.name}">Name</small></td>
+                            <td><span class="badge bg-secondary" th:text="${h.sector}">Sector</span></td>
+                            <td class="text-end" th:text="${h.quantity}">0</td>
+                            <td class="text-end">&#8377; <span th:text="${h.avgBuyPrice}">0</span></td>
+                            <td class="text-end">&#8377; <span th:text="${h.currentPrice}">0</span></td>
+                            <td class="text-end">&#8377; <span th:text="${#numbers.formatDecimal(h.investedValue, 0, 'COMMA', 2, 'POINT')}">0</span></td>
+                            <td class="text-end">&#8377; <span th:text="${#numbers.formatDecimal(h.currentValue, 0, 'COMMA', 2, 'POINT')}">0</span></td>
+                            <td class="text-end fw-bold"
+                                th:classappend="${h.unrealizedPnl.signum() >= 0} ? 'text-success' : 'text-danger'">
+                                &#8377; <span th:text="${#numbers.formatDecimal(h.unrealizedPnl, 0, 'COMMA', 2, 'POINT')}">0</span>
+                            </td>
+                            <td class="text-end fw-bold"
+                                th:classappend="${h.unrealizedPnl.signum() >= 0} ? 'text-success' : 'text-danger'">
+                                <span th:text="${h.pnlPercent}">0</span>%
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-3" th:unless="${summary.holdings.isEmpty()}">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white"><h5 class="mb-0">Allocation by Stock</h5></div>
+                <div class="card-body"><canvas id="stockChart" height="250"></canvas></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white"><h5 class="mb-0">Allocation by Sector</h5></div>
+                <div class="card-body"><canvas id="sectorChart" height="250"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>
