@@ -196,9 +196,4 @@ MIT License. Free to use for learning and portfolio.
 ---
 
 ## 👨‍💻 Built By
-
-A passionate fresh graduate aiming for **Infosys SP/DSE 2026 | JPMorgan | Microsoft** roles.
-
----
-
-*"From CRUD to crore-rupee tax calculator — built end-to-end in pure Java + Spring Boot."*
+Aachal Vaishnav
